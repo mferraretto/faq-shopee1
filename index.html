@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -101,14 +100,6 @@
     <button onclick="fazerLogin()">Entrar</button>
   </div>
 </div>
-
-<div id="loginContainer">
-  <div id="loginBox">
-    <h3>Login de Atendente</h3>
-    <input type="text" id="nomeAtendente" placeholder="Digite seu nome" style="width:100%;padding:10px;margin:10px 0;"/>
-    <button onclick="fazerLogin()">Entrar</button>
-  </div>
-</div>
 <header>
   <h1>FAQ Shopee Profissional</h1>
   <div>
@@ -121,6 +112,7 @@
 <main>
   <p id="infoAtendente"></p>
   <p id="ultimaResposta"></p>
+  <div id="conteudoFAQ"></div>
 </main>
 <div id="statsModal">
   <span class="closeModal" onclick="document.getElementById('statsModal').style.display='none'">✖</span>
@@ -128,189 +120,101 @@
   <ul id="statsList"></ul>
 </div>
 <script>
-  const senhaCorreta = "4618827";
-  let nomeAtendente = "";
+  window.onload = function () {
+    const senhaCorreta = "4618827";
+    let nomeAtendente = "";
 
-  function fazerLogin() {
-    nomeAtendente = document.getElementById("nomeAtendente").value.trim();
-    if (nomeAtendente) {
-      localStorage.setItem("nomeAtendente", nomeAtendente);
+    if (localStorage.getItem("nomeAtendente")) {
+      nomeAtendente = localStorage.getItem("nomeAtendente");
       document.getElementById("loginContainer").style.display = "none";
       document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
     }
-  }
 
-  if (localStorage.getItem("nomeAtendente")) {
-    nomeAtendente = localStorage.getItem("nomeAtendente");
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
-  }
-
-  function registrarClique(perguntaId) {
-    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    dados[perguntaId] = (dados[perguntaId] || 0) + 1;
-    localStorage.setItem("faqClicks", JSON.stringify(dados));
-    localStorage.setItem("ultimaPergunta", perguntaId);
-    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + perguntaId;
-  }
-
-  if (localStorage.getItem("ultimaPergunta")) {
-    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + localStorage.getItem("ultimaPergunta");
-  }
-
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark");
-    localStorage.setItem("modoEscuro", document.body.classList.contains("dark"));
-  }
-
-  if (localStorage.getItem("modoEscuro") === "true") {
-    document.body.classList.add("dark");
-  }
-
-  function abrirEstatisticas() {
-    const senha = prompt("Digite a senha:");
-    if (senha === senhaCorreta) {
-      const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-      const lista = Object.entries(dados).sort((a,b)=>b[1]-a[1]).slice(0,10);
-      const container = document.getElementById("statsList");
-      container.innerHTML = lista.map(item => `<li><strong>${item[0]}</strong>: ${item[1]} cliques</li>`).join("");
-      document.getElementById("statsModal").style.display = "block";
-    } else {
-      alert("Senha incorreta.");
+    if (localStorage.getItem("ultimaPergunta")) {
+      document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + localStorage.getItem("ultimaPergunta");
     }
-  }
 
-  function exportarCSV() {
-    const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    let csv = "Pergunta,Cliques\n";
-    for (const [pergunta, cliques] of Object.entries(dados)) {
-      csv += `"${pergunta}",${cliques}\n`;
+    if (localStorage.getItem("modoEscuro") === "true") {
+      document.body.classList.add("dark");
     }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "faq-cliques.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
 
-  function exportarPDF() {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    const atendente = nomeAtendente || "Desconhecido";
-    pdf.text("FAQ - Respostas Utilizadas", 10, 10);
-    pdf.text("Atendente: " + atendente, 10, 20);
-
-    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    let y = 30;
-    for (const [pergunta, cliques] of Object.entries(dados)) {
-      pdf.text(`${pergunta} - ${cliques} cliques`, 10, y);
-      y += 10;
-      if (y > 280) {
-        pdf.addPage();
-        y = 10;
+    window.fazerLogin = function () {
+      nomeAtendente = document.getElementById("nomeAtendente").value.trim();
+      if (nomeAtendente) {
+        localStorage.setItem("nomeAtendente", nomeAtendente);
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
       }
-    }
+    };
 
-    pdf.save("faq-respostas.pdf");
-  }
-</script>
+    window.toggleDarkMode = function () {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("modoEscuro", document.body.classList.contains("dark"));
+    };
 
-<script>
-  const senhaCorreta = "4618827";
-  let nomeAtendente = "";
+    window.registrarClique = function (perguntaId) {
+      let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+      dados[perguntaId] = (dados[perguntaId] || 0) + 1;
+      localStorage.setItem("faqClicks", JSON.stringify(dados));
+      localStorage.setItem("ultimaPergunta", perguntaId);
+      document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + perguntaId;
+    };
 
-  function fazerLogin() {
-    nomeAtendente = document.getElementById("nomeAtendente").value.trim();
-    if (nomeAtendente) {
-      localStorage.setItem("nomeAtendente", nomeAtendente);
-      document.getElementById("loginContainer").style.display = "none";
-      document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
-    }
-  }
-
-  if (localStorage.getItem("nomeAtendente")) {
-    nomeAtendente = localStorage.getItem("nomeAtendente");
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
-  }
-
-  function registrarClique(perguntaId) {
-    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    dados[perguntaId] = (dados[perguntaId] || 0) + 1;
-    localStorage.setItem("faqClicks", JSON.stringify(dados));
-    localStorage.setItem("ultimaPergunta", perguntaId);
-    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + perguntaId;
-  }
-
-  if (localStorage.getItem("ultimaPergunta")) {
-    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + localStorage.getItem("ultimaPergunta");
-  }
-
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark");
-    localStorage.setItem("modoEscuro", document.body.classList.contains("dark"));
-  }
-
-  if (localStorage.getItem("modoEscuro") === "true") {
-    document.body.classList.add("dark");
-  }
-
-  function abrirEstatisticas() {
-    const senha = prompt("Digite a senha:");
-    if (senha === senhaCorreta) {
-      const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-      const lista = Object.entries(dados).sort((a,b)=>b[1]-a[1]).slice(0,10);
-      const container = document.getElementById("statsList");
-      container.innerHTML = lista.map(item => `<li><strong>${item[0]}</strong>: ${item[1]} cliques</li>`).join("");
-      document.getElementById("statsModal").style.display = "block";
-    } else {
-      alert("Senha incorreta.");
-    }
-  }
-
-  function exportarCSV() {
-    const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    let csv = "Pergunta,Cliques\n";
-    for (const [pergunta, cliques] of Object.entries(dados)) {
-      csv += `"${pergunta}",${cliques}\n`;
-    }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "faq-cliques.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  function exportarPDF() {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    const atendente = nomeAtendente || "Desconhecido";
-    pdf.text("FAQ - Respostas Utilizadas", 10, 10);
-    pdf.text("Atendente: " + atendente, 10, 20);
-
-    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
-    let y = 30;
-    for (const [pergunta, cliques] of Object.entries(dados)) {
-      pdf.text(`${pergunta} - ${cliques} cliques`, 10, y);
-      y += 10;
-      if (y > 280) {
-        pdf.addPage();
-        y = 10;
+    window.abrirEstatisticas = function () {
+      const senha = prompt("Digite a senha:");
+      if (senha === senhaCorreta) {
+        const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+        const lista = Object.entries(dados).sort((a,b)=>b[1]-a[1]).slice(0,10);
+        const container = document.getElementById("statsList");
+        container.innerHTML = lista.map(item => `<li><strong>${item[0]}</strong>: ${item[1]} cliques</li>`).join("");
+        document.getElementById("statsModal").style.display = "block";
+      } else {
+        alert("Senha incorreta.");
       }
-    }
+    };
 
-    pdf.save("faq-respostas.pdf");
-  }
+    window.exportarCSV = function () {
+      const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+      let csv = "Pergunta,Cliques\n";
+      for (const [pergunta, cliques] of Object.entries(dados)) {
+        csv += `"${pergunta}",${cliques}\n`;
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "faq-cliques.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
 
-  function shareWhatsApp(btn) {
-    const text = btn.previousElementSibling.innerText.trim();
-    const url = "https://wa.me/?text=" + encodeURIComponent(text);
-    window.open(url, '_blank');
-  }
+    window.exportarPDF = function () {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      const atendente = nomeAtendente || "Desconhecido";
+      pdf.text("FAQ - Respostas Utilizadas", 10, 10);
+      pdf.text("Atendente: " + atendente, 10, 20);
+
+      let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+      let y = 30;
+      for (const [pergunta, cliques] of Object.entries(dados)) {
+        pdf.text(`${pergunta} - ${cliques} cliques`, 10, y);
+        y += 10;
+        if (y > 280) {
+          pdf.addPage();
+          y = 10;
+        }
+      }
+
+      pdf.save("faq-respostas.pdf");
+    };
+
+    window.shareWhatsApp = function (btn) {
+      const text = btn.previousElementSibling.innerText.trim();
+      const url = "https://wa.me/?text=" + encodeURIComponent(text);
+      window.open(url, '_blank');
+    };
+  };
 </script>
 </body>
 </html>
