@@ -1,51 +1,316 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAQ Shopee Profissional v3.0</title>
-  <link rel="manifest" href="manifest.json">
+  <title>FAQ Shopee Profissional</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-    body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
-    :root { --bg: #f8f9fa; --text: #212529; --card: #fff; }
-    body.dark { --bg: #212529; --text: #f8f9fa; --card: #343a40; }
-    header { background: #dc3545; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    main { padding: 1rem 2rem; }
-    button { margin-right: 10px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
-    .copyBtn, .whatsBtn { background: #ffc107; margin-top: 6px; }
-    .resposta { background: var(--card); padding: 10px; border-left: 4px solid #17a2b8; margin-top: 8px; border-radius: 6px; }
-    details { margin-bottom: 15px; }
-    #statsModal, #adminModal { display: none; position: fixed; top: 10%; left: 10%; width: 80%; background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 9999; }
-    .closeModal { float: right; cursor: pointer; font-size: 20px; color: #dc3545; }
-    #loginContainer { background: var(--card); padding: 1rem; border-radius: 8px; max-width: 400px; margin: 2rem auto; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    :root {
+      --bg: #f8f9fa;
+      --text: #212529;
+      --card: #fff;
+    }
+    body.dark {
+      --bg: #212529;
+      --text: #f8f9fa;
+      --card: #343a40;
+    }
+    header {
+      background: #dc3545;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    main {
+      padding: 1rem 2rem;
+    }
+    button {
+      margin-right: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .copyBtn, .whatsBtn {
+      background: #ffc107;
+      margin-top: 6px;
+    }
+    .resposta {
+      background: var(--card);
+      padding: 10px;
+      border-left: 4px solid #17a2b8;
+      margin-top: 8px;
+      border-radius: 6px;
+    }
+    details {
+      margin-bottom: 15px;
+    }
+    #statsModal {
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 10%;
+      width: 80%;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+    }
+    .closeModal {
+      float: right;
+      cursor: pointer;
+      font-size: 20px;
+      color: #dc3545;
+    }
+    #loginContainer {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    #loginBox {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 300px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>FAQ Shopee Profissional</h1>
-    <div>
-      <button onclick="toggleDarkMode()">🌙 Modo Escuro</button>
-      <button onclick="abrirEstatisticas()">📊 Ver Estatísticas</button>
-      <button onclick="abrirAdmin()">🛠️ Painel Admin</button>
-      <button onclick="exportarCSV()">📥 Exportar CSV</button>
-      <button onclick="exportarPDF()">📄 Exportar PDF</button>
-    </div>
-  </header>
-  <div id="loginContainer">
-    <h3>🔐 Login de Atendente</h3>
-    <input id="nomeAtendente" placeholder="Digite seu nome" style="padding:8px;width:100%;margin-bottom:10px;">
+<div id="loginContainer">
+  <div id="loginBox">
+    <h3>Login de Atendente</h3>
+    <input type="text" id="nomeAtendente" placeholder="Digite seu nome" style="width:100%;padding:10px;margin:10px 0;"/>
     <button onclick="fazerLogin()">Entrar</button>
   </div>
-  <main id="conteudo" style="display:none;">
-    <input id="inputIA" oninput="sugerirResposta()" placeholder="Digite a dúvida do cliente..." style="width:100%;padding:10px;margin-bottom:20px;" />
-    <div id="sugestaoIA" style="margin-bottom:20px;color:#17a2b8;font-style:italic;"></div>
-    <div id="faqContainer"></div>
-  </main>
-  <div id="statsModal"><span class="closeModal" onclick="document.getElementById('statsModal').style.display='none'">✖</span><h3>📊 Estatísticas de Cliques</h3><ul id="statsList"></ul></div>
-  <div id="adminModal"><span class="closeModal" onclick="document.getElementById('adminModal').style.display='none'">✖</span><h3>🛠️ Gerenciar Perguntas</h3><input id="novaPergunta" placeholder="Nova pergunta" style="width:100%;padding:8px;margin:5px 0"><textarea id="novaResposta" placeholder="Resposta" style="width:100%;padding:8px;height:100px"></textarea><button onclick="adicionarPergunta()">Adicionar</button><div id="listaPerguntas"></div></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="faq-script.js"></script>
-  <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('service-worker.js'); }</script>
+</div>
+
+<div id="loginContainer">
+  <div id="loginBox">
+    <h3>Login de Atendente</h3>
+    <input type="text" id="nomeAtendente" placeholder="Digite seu nome" style="width:100%;padding:10px;margin:10px 0;"/>
+    <button onclick="fazerLogin()">Entrar</button>
+  </div>
+</div>
+<header>
+  <h1>FAQ Shopee Profissional</h1>
+  <div>
+    <button onclick="toggleDarkMode()">🌙 Modo Escuro</button>
+    <button onclick="abrirEstatisticas()">📊 Ver Estatísticas</button>
+    <button onclick="exportarCSV()">📥 Exportar CSV</button>
+    <button onclick="exportarPDF()">📄 Exportar PDF</button>
+  </div>
+</header>
+<main>
+  <p id="infoAtendente"></p>
+  <p id="ultimaResposta"></p>
+</main>
+<div id="statsModal">
+  <span class="closeModal" onclick="document.getElementById('statsModal').style.display='none'">✖</span>
+  <h3>📊 Estatísticas de Cliques</h3>
+  <ul id="statsList"></ul>
+</div>
+<script>
+  const senhaCorreta = "4618827";
+  let nomeAtendente = "";
+
+  function fazerLogin() {
+    nomeAtendente = document.getElementById("nomeAtendente").value.trim();
+    if (nomeAtendente) {
+      localStorage.setItem("nomeAtendente", nomeAtendente);
+      document.getElementById("loginContainer").style.display = "none";
+      document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
+    }
+  }
+
+  if (localStorage.getItem("nomeAtendente")) {
+    nomeAtendente = localStorage.getItem("nomeAtendente");
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
+  }
+
+  function registrarClique(perguntaId) {
+    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    dados[perguntaId] = (dados[perguntaId] || 0) + 1;
+    localStorage.setItem("faqClicks", JSON.stringify(dados));
+    localStorage.setItem("ultimaPergunta", perguntaId);
+    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + perguntaId;
+  }
+
+  if (localStorage.getItem("ultimaPergunta")) {
+    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + localStorage.getItem("ultimaPergunta");
+  }
+
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("modoEscuro", document.body.classList.contains("dark"));
+  }
+
+  if (localStorage.getItem("modoEscuro") === "true") {
+    document.body.classList.add("dark");
+  }
+
+  function abrirEstatisticas() {
+    const senha = prompt("Digite a senha:");
+    if (senha === senhaCorreta) {
+      const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+      const lista = Object.entries(dados).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      const container = document.getElementById("statsList");
+      container.innerHTML = lista.map(item => `<li><strong>${item[0]}</strong>: ${item[1]} cliques</li>`).join("");
+      document.getElementById("statsModal").style.display = "block";
+    } else {
+      alert("Senha incorreta.");
+    }
+  }
+
+  function exportarCSV() {
+    const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    let csv = "Pergunta,Cliques\n";
+    for (const [pergunta, cliques] of Object.entries(dados)) {
+      csv += `"${pergunta}",${cliques}\n`;
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "faq-cliques.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const atendente = nomeAtendente || "Desconhecido";
+    pdf.text("FAQ - Respostas Utilizadas", 10, 10);
+    pdf.text("Atendente: " + atendente, 10, 20);
+
+    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    let y = 30;
+    for (const [pergunta, cliques] of Object.entries(dados)) {
+      pdf.text(`${pergunta} - ${cliques} cliques`, 10, y);
+      y += 10;
+      if (y > 280) {
+        pdf.addPage();
+        y = 10;
+      }
+    }
+
+    pdf.save("faq-respostas.pdf");
+  }
+</script>
+
+<script>
+  const senhaCorreta = "4618827";
+  let nomeAtendente = "";
+
+  function fazerLogin() {
+    nomeAtendente = document.getElementById("nomeAtendente").value.trim();
+    if (nomeAtendente) {
+      localStorage.setItem("nomeAtendente", nomeAtendente);
+      document.getElementById("loginContainer").style.display = "none";
+      document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
+    }
+  }
+
+  if (localStorage.getItem("nomeAtendente")) {
+    nomeAtendente = localStorage.getItem("nomeAtendente");
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("infoAtendente").innerText = "👤 Atendente: " + nomeAtendente;
+  }
+
+  function registrarClique(perguntaId) {
+    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    dados[perguntaId] = (dados[perguntaId] || 0) + 1;
+    localStorage.setItem("faqClicks", JSON.stringify(dados));
+    localStorage.setItem("ultimaPergunta", perguntaId);
+    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + perguntaId;
+  }
+
+  if (localStorage.getItem("ultimaPergunta")) {
+    document.getElementById("ultimaResposta").innerText = "📌 Última resposta: " + localStorage.getItem("ultimaPergunta");
+  }
+
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("modoEscuro", document.body.classList.contains("dark"));
+  }
+
+  if (localStorage.getItem("modoEscuro") === "true") {
+    document.body.classList.add("dark");
+  }
+
+  function abrirEstatisticas() {
+    const senha = prompt("Digite a senha:");
+    if (senha === senhaCorreta) {
+      const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+      const lista = Object.entries(dados).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      const container = document.getElementById("statsList");
+      container.innerHTML = lista.map(item => `<li><strong>${item[0]}</strong>: ${item[1]} cliques</li>`).join("");
+      document.getElementById("statsModal").style.display = "block";
+    } else {
+      alert("Senha incorreta.");
+    }
+  }
+
+  function exportarCSV() {
+    const dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    let csv = "Pergunta,Cliques\n";
+    for (const [pergunta, cliques] of Object.entries(dados)) {
+      csv += `"${pergunta}",${cliques}\n`;
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "faq-cliques.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const atendente = nomeAtendente || "Desconhecido";
+    pdf.text("FAQ - Respostas Utilizadas", 10, 10);
+    pdf.text("Atendente: " + atendente, 10, 20);
+
+    let dados = JSON.parse(localStorage.getItem("faqClicks") || "{}");
+    let y = 30;
+    for (const [pergunta, cliques] of Object.entries(dados)) {
+      pdf.text(`${pergunta} - ${cliques} cliques`, 10, y);
+      y += 10;
+      if (y > 280) {
+        pdf.addPage();
+        y = 10;
+      }
+    }
+
+    pdf.save("faq-respostas.pdf");
+  }
+
+  function shareWhatsApp(btn) {
+    const text = btn.previousElementSibling.innerText.trim();
+    const url = "https://wa.me/?text=" + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+</script>
 </body>
 </html>
