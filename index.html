@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ Shopee Profissional v3.0</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    :root { --bg: #f8f9fa; --text: #212529; --card: #fff; }
+    body.dark { --bg: #212529; --text: #f8f9fa; --card: #343a40; }
+    header { background: #dc3545; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    main { padding: 1rem 2rem; }
+    button { margin-right: 10px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+    .copyBtn, .whatsBtn { background: #ffc107; margin-top: 6px; }
+    .resposta { background: var(--card); padding: 10px; border-left: 4px solid #17a2b8; margin-top: 8px; border-radius: 6px; }
+    details { margin-bottom: 15px; }
+    #statsModal, #adminModal { display: none; position: fixed; top: 10%; left: 10%; width: 80%; background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 9999; }
+    .closeModal { float: right; cursor: pointer; font-size: 20px; color: #dc3545; }
+    #loginContainer { background: var(--card); padding: 1rem; border-radius: 8px; max-width: 400px; margin: 2rem auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FAQ Shopee Profissional</h1>
+    <div>
+      <button onclick="toggleDarkMode()">🌙 Modo Escuro</button>
+      <button onclick="abrirEstatisticas()">📊 Ver Estatísticas</button>
+      <button onclick="abrirAdmin()">🛠️ Painel Admin</button>
+      <button onclick="exportarCSV()">📥 Exportar CSV</button>
+      <button onclick="exportarPDF()">📄 Exportar PDF</button>
+    </div>
+  </header>
+  <div id="loginContainer">
+    <h3>🔐 Login de Atendente</h3>
+    <input id="nomeAtendente" placeholder="Digite seu nome" style="padding:8px;width:100%;margin-bottom:10px;">
+    <button onclick="fazerLogin()">Entrar</button>
+  </div>
+  <main id="conteudo" style="display:none;">
+    <input id="inputIA" oninput="sugerirResposta()" placeholder="Digite a dúvida do cliente..." style="width:100%;padding:10px;margin-bottom:20px;" />
+    <div id="sugestaoIA" style="margin-bottom:20px;color:#17a2b8;font-style:italic;"></div>
+    <div id="faqContainer"></div>
+  </main>
+  <div id="statsModal"><span class="closeModal" onclick="document.getElementById('statsModal').style.display='none'">✖</span><h3>📊 Estatísticas de Cliques</h3><ul id="statsList"></ul></div>
+  <div id="adminModal"><span class="closeModal" onclick="document.getElementById('adminModal').style.display='none'">✖</span><h3>🛠️ Gerenciar Perguntas</h3><input id="novaPergunta" placeholder="Nova pergunta" style="width:100%;padding:8px;margin:5px 0"><textarea id="novaResposta" placeholder="Resposta" style="width:100%;padding:8px;height:100px"></textarea><button onclick="adicionarPergunta()">Adicionar</button><div id="listaPerguntas"></div></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="faq-script.js"></script>
+  <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('service-worker.js'); }</script>
+</body>
+</html>
